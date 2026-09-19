@@ -4,6 +4,7 @@ import io.hexlet.spring_boot.model.Post;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +43,16 @@ public class Application {
     }
 
     @GetMapping("/posts")
-    public List<Post> index(@RequestParam(defaultValue = "10") Integer limit) {
-        return posts.stream().limit(limit).toList();
+    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
+        List<Post> postsResult = posts.stream().limit(limit).toList();
+
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(posts.size()))
+                .body(postsResult);
     }
 
     @PostMapping("/posts")
-    public Post create(@RequestBody Post data) {
+    public ResponseEntity<Post> create(@RequestBody Post data) {
         Post post = new Post();
         post.setAuthor(data.getAuthor());
         post.setTitle(data.getTitle());
@@ -53,17 +60,22 @@ public class Application {
         post.setCreatedAt(LocalDateTime.now());
 
         posts.add(post);
-        return post;
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(post.getTitle())
+                .toUri();
+        return ResponseEntity.created(location).body(post);
     }
 
     @GetMapping("/posts/{id}")
-    public Optional<Post> show(@PathVariable String id) {
+    public ResponseEntity<Post> show(@PathVariable String id) {
         var post = posts.stream().filter(p -> p.getTitle().equals(id)).findFirst();
-        return post;
+        return ResponseEntity.of(post);
     }
 
     @PutMapping("/posts/{id}")
-    public Post update(@PathVariable String id, @RequestBody Post data) {
+    public ResponseEntity<Post> update(@PathVariable String id, @RequestBody Post data) {
         var post = posts.stream()
                 .filter(p -> p.getTitle().equals(id))
                 .findFirst()
@@ -74,12 +86,15 @@ public class Application {
         post.setContent(data.getContent());
         post.setCreatedAt(LocalDateTime.now());
 
-        return post;
+        return ResponseEntity.ok(post);
     }
 
     @DeleteMapping("/posts/{id}")
-    public void destroy(@PathVariable String id) {
-        posts.removeIf(p -> p.getTitle().equals(id));
+    public ResponseEntity<Void> destroy(@PathVariable String id) {
+        boolean removed = posts.removeIf(p -> p.getTitle().equals(id));
+        return removed
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
 }
