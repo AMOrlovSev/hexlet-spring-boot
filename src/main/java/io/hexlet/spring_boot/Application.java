@@ -1,6 +1,5 @@
 package io.hexlet.spring_boot;
 
-import io.hexlet.spring_boot.model.Page;
 import io.hexlet.spring_boot.model.Post;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,8 +23,6 @@ import java.util.Optional;
 @RestController
 public class Application {
 
-
-    private List<Page> pages = new ArrayList<>();
     private List<Post> posts = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -42,49 +39,13 @@ public class Application {
         return "This is simple Spring blog!";
     }
 
-    @GetMapping("/pages")
-    public List<Page> index(@RequestParam(defaultValue = "10") Integer limit) {
-        return pages.stream().limit(limit).toList();
-    }
-
-    @PostMapping("/pages")
-    public Page create(@RequestBody Page page) {
-        pages.add(page);
-        return page;
-    }
-
-    @GetMapping("/pages/{id}")
-    public Optional<Page> show(@PathVariable String id) {
-        var page = pages.stream().filter(p -> p.getSlug().equals(id)).findFirst();
-        return page;
-    }
-
-    @PutMapping("/pages/{id}")
-    public Page update(@PathVariable String id, @RequestBody Page data) {
-        var page = pages.stream()
-                .filter(p -> p.getSlug().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        page.setSlug(data.getSlug());
-        page.setName(data.getName());
-        page.setBody(data.getBody());
-
-        return page;
-    }
-
-    @DeleteMapping("/pages/{id}")
-    public void destroy(@PathVariable String id) {
-        pages.removeIf(p -> p.getSlug().equals(id));
-    }
-
     @GetMapping("/posts")
-    public List<Post> indexPosts(@RequestParam(defaultValue = "10") Integer limit) {
+    public List<Post> index(@RequestParam(defaultValue = "10") Integer limit) {
         return posts.stream().limit(limit).toList();
     }
 
     @PostMapping("/posts")
-    public Post createPosts(@RequestBody Post data) {
+    public Post create(@RequestBody Post data) {
         Post post = new Post();
         post.setAuthor(data.getAuthor());
         post.setTitle(data.getTitle());
@@ -96,13 +57,13 @@ public class Application {
     }
 
     @GetMapping("/posts/{id}")
-    public Optional<Post> showPosts(@PathVariable String id) {
+    public Optional<Post> show(@PathVariable String id) {
         var post = posts.stream().filter(p -> p.getTitle().equals(id)).findFirst();
         return post;
     }
 
     @PutMapping("/posts/{id}")
-    public Post updatePosts(@PathVariable String id, @RequestBody Post data) {
+    public Post update(@PathVariable String id, @RequestBody Post data) {
         var post = posts.stream()
                 .filter(p -> p.getTitle().equals(id))
                 .findFirst()
@@ -117,7 +78,7 @@ public class Application {
     }
 
     @DeleteMapping("/posts/{id}")
-    public void destroyPosts(@PathVariable String id) {
+    public void destroy(@PathVariable String id) {
         posts.removeIf(p -> p.getTitle().equals(id));
     }
 
