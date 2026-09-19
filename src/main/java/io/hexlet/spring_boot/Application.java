@@ -18,4 +18,9 @@ public class Application {
 		return "Hello World!";
 	}
 
+	@GetMapping("/about")
+	public String about() {
+		return "This is simple Spring blog!";
+	}
+
 }
