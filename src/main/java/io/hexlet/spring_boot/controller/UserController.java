@@ -1,7 +1,9 @@
 package io.hexlet.spring_boot.controller;
 
+import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.model.User;
 import io.hexlet.spring_boot.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User data) {
+    public ResponseEntity<User> create(@Valid @RequestBody User data) {
         User user = new User();
         user.setEmail(data.getEmail());
         user.setFirstName(data.getFirstName());
@@ -57,14 +59,15 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> show(@PathVariable Long id) {
-        var user = userRepository.findById(id);
-        return ResponseEntity.of(user);
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User data) {
+    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User data) {
         var user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
         user.setEmail(data.getEmail());
         user.setFirstName(data.getFirstName());

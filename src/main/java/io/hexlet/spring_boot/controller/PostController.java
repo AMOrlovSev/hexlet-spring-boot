@@ -1,7 +1,9 @@
 package io.hexlet.spring_boot.controller;
 
+import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.model.Post;
 import io.hexlet.spring_boot.repository.PostRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -38,7 +41,7 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<Post> create(@RequestBody Post data) {
+    public ResponseEntity<Post> create(@Valid @RequestBody Post data) {
         Post post = new Post();
 
         post.setTitle(data.getTitle());
@@ -52,19 +55,20 @@ public class PostController {
                 .path("/{id}")
                 .buildAndExpand(saved.getId())
                 .toUri();
-        return ResponseEntity.created(location).body(post);
+        return ResponseEntity.created(location).body(saved);
     }
 
     @GetMapping("/posts/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
-        var post = postRepository.findById(id);
-        return ResponseEntity.of(post);
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+        return ResponseEntity.ok(post);
     }
 
     @PutMapping("/posts/{id}")
-    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post data) {
-        var post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
         post.setTitle(data.getTitle());
         post.setContent(data.getContent());

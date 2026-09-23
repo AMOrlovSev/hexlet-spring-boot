@@ -32,6 +32,8 @@ dependencies {
 
 	// для работы с JPA (Hibernate) и репозиториями
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 tasks.withType<Test> {
