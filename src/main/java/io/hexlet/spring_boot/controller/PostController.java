@@ -1,6 +1,7 @@
 package io.hexlet.spring_boot.controller;
 
 import io.hexlet.spring_boot.model.Post;
+import io.hexlet.spring_boot.repository.PostRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,67 +17,70 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class PostController {
-    private List<Post> posts = new ArrayList<Post>();
+    private final PostRepository postRepository;
+
+    public PostController(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     @GetMapping("/posts")
     public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        List<Post> postsResult = posts.stream().limit(limit).toList();
+        List<Post> posts = postRepository.findAll();
 
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(posts.size()))
-                .body(postsResult);
+                .body(posts);
     }
 
     @PostMapping("/posts")
     public ResponseEntity<Post> create(@RequestBody Post data) {
         Post post = new Post();
-        post.setAuthor(data.getAuthor());
+
         post.setTitle(data.getTitle());
         post.setContent(data.getContent());
-        post.setCreatedAt(LocalDateTime.now());
+        post.setPublished(data.isPublished());
 
-        posts.add(post);
+        Post saved = postRepository.save(post);
+
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(post.getTitle())
+                .buildAndExpand(saved.getId())
                 .toUri();
         return ResponseEntity.created(location).body(post);
     }
 
     @GetMapping("/posts/{id}")
-    public ResponseEntity<Post> show(@PathVariable String id) {
-        var post = posts.stream().filter(p -> p.getTitle().equals(id)).findFirst();
+    public ResponseEntity<Post> show(@PathVariable Long id) {
+        var post = postRepository.findById(id);
         return ResponseEntity.of(post);
     }
 
     @PutMapping("/posts/{id}")
-    public ResponseEntity<Post> update(@PathVariable String id, @RequestBody Post data) {
-        var post = posts.stream()
-                .filter(p -> p.getTitle().equals(id))
-                .findFirst()
+    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post data) {
+        var post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        post.setAuthor(data.getAuthor());
         post.setTitle(data.getTitle());
         post.setContent(data.getContent());
-        post.setCreatedAt(LocalDateTime.now());
+        post.setPublished(data.isPublished());
 
-        return ResponseEntity.ok(post);
+        Post updated = postRepository.save(post);
+
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/posts/{id}")
-    public ResponseEntity<Void> destroy(@PathVariable String id) {
-        boolean removed = posts.removeIf(p -> p.getTitle().equals(id));
-        return removed
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> destroy(@PathVariable Long id) {
+        if (!postRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        postRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
