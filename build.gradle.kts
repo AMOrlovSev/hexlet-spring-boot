@@ -28,6 +28,9 @@ dependencies {
 	testAnnotationProcessor("org.projectlombok:lombok")
 
 	runtimeOnly("com.h2database:h2")
+
+	// для работы с JPA (Hibernate) и репозиториями
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 }
 
 tasks.withType<Test> {
