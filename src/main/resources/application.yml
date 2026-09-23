@@ -1,7 +1,17 @@
 spring:
   application:
     name: spring-boot
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
   jpa:
+    hibernate:
+      ddl-auto: update
     show-sql: true # вывод SQL-запросов
   output:
     ansi:
