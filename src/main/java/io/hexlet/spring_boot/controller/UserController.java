@@ -28,7 +28,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+         this.userRepository = userRepository;
     }
 
     @GetMapping
