@@ -22,7 +22,6 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
@@ -36,6 +35,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 
 	implementation("net.datafaker:datafaker:2.7.0")
+
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	// Дает MockMvc и аннотацию @AutoConfigureMockMvc
+	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+	// Для работы с аутентификацией
+	testImplementation("org.springframework.security:spring-security-test")
+	// Для проверки тела ответа
+	testImplementation("net.javacrumbs.json-unit:json-unit-assertj:6.2.0")
+	// Instancio
+	testImplementation("org.instancio:instancio-junit:5.6.0")
 }
 
 tasks.withType<Test> {
