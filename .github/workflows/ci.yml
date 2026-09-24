@@ -23,3 +23,6 @@ jobs:
 
       - name: Build & Test
         run: ./gradlew clean build --no-daemon
+
+      - name: Coverage report
+        run: ./gradlew jacocoTestReport
