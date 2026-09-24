@@ -48,7 +48,7 @@ class PostControllerTest {
     void setUp() {
         existingPost = new Post();
         existingPost.setTitle(faker.book().title());
-        existingPost.setContent(faker.lorem().paragraph());
+        existingPost.setContent(faker.lorem().paragraph(3));
         existingPost.setPublished(true);
         existingPost = postRepository.save(existingPost);
     }
@@ -57,7 +57,7 @@ class PostControllerTest {
     void index_returns200_andOnlyPublishedPosts() throws Exception {
         Post unpublished = new Post();
         unpublished.setTitle(faker.book().title());
-        unpublished.setContent(faker.lorem().paragraph());
+        unpublished.setContent(faker.lorem().paragraph(3));
         unpublished.setPublished(false);
         postRepository.save(unpublished);
 

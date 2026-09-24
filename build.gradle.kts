@@ -3,6 +3,7 @@ plugins {
 	id("org.springframework.boot") version "4.1.1"
 	id("io.spring.dependency-management") version "1.1.7"
 	jacoco
+	id("org.sonarqube") version "7.5.0.8588"
 }
 
 group = "io.hexlet"
@@ -62,4 +63,11 @@ tasks.jacocoTestReport {
 
 tasks.check {
 	dependsOn(tasks.jacocoTestReport)
+}
+
+sonar {
+	properties {
+		property("sonar.projectKey", "AMOrlovSev_hexlet-spring-boot")
+		property("sonar.organization", "amorlovsev")
+	}
 }
