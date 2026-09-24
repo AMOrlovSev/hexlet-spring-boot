@@ -26,4 +26,6 @@ public class Application {
         return "This is simple Spring blog!";
     }
 
+
+
 }

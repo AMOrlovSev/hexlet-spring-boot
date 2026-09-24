@@ -34,6 +34,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	implementation("net.datafaker:datafaker:2.7.0")
 }
 
 tasks.withType<Test> {
