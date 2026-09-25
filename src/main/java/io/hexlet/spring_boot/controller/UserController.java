@@ -1,6 +1,8 @@
 package io.hexlet.spring_boot.controller;
 
+import io.hexlet.spring_boot.dto.UserDTO;
 import io.hexlet.spring_boot.exception.ResourceNotFoundException;
+import io.hexlet.spring_boot.mapper.UserMapper;
 import io.hexlet.spring_boot.model.User;
 import io.hexlet.spring_boot.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -26,22 +28,25 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, UserMapper userMapper) {
          this.userRepository = userRepository;
+         this.userMapper = userMapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> index(@RequestParam(defaultValue = "10") Integer limit) {
+    public ResponseEntity<List<UserDTO>> index(@RequestParam(defaultValue = "10") Integer limit) {
         List<User> users = userRepository.findAll();
+        List<UserDTO> usersDTO = users.stream().limit(limit).map(userMapper::toDTO).toList();
 
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(users.size()))
-                .body(users);
+                .body(usersDTO);
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User data) {
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody User data) {
         User user = new User();
         user.setEmail(data.getEmail());
         user.setFirstName(data.getFirstName());
@@ -49,23 +54,24 @@ public class UserController {
         user.setBirthday(data.getBirthday());
 
         User saved = userRepository.save(user);
+        UserDTO userDTO = userMapper.toDTO(saved);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(saved.getId())
                 .toUri();
-        return ResponseEntity.created(location).body(saved);
+        return ResponseEntity.created(location).body(userDTO);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> show(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> show(@PathVariable Long id) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userMapper.toDTO(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User data) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody User data) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -76,7 +82,7 @@ public class UserController {
 
         User updated = userRepository.save(user);
 
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(userMapper.toDTO(updated));
     }
 
     @DeleteMapping("/{id}")
