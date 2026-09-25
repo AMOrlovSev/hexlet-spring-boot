@@ -2,7 +2,10 @@ package io.hexlet.spring_boot.controller;
 
 import io.hexlet.spring_boot.dto.PostCreateDTO;
 import io.hexlet.spring_boot.dto.PostDTO;
+import io.hexlet.spring_boot.dto.PostPatchDTO;
 import io.hexlet.spring_boot.dto.PostUpdateDTO;
+import io.hexlet.spring_boot.dto.UserDTO;
+import io.hexlet.spring_boot.dto.UserPatchDTO;
 import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.mapper.PostMapper;
 import io.hexlet.spring_boot.model.Post;
@@ -12,8 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -78,5 +83,18 @@ public class PostController {
         }
         postRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/posts/{id}")
+    public ResponseEntity<PostDTO> patch(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
+        var post =
+                postRepository
+                        .findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        postMapper.updateEntityFromDTO(dto, post);
+
+        postRepository.save(post);
+        return ResponseEntity.ok(postMapper.toDTO(post));
     }
 }

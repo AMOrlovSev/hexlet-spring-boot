@@ -2,6 +2,7 @@ package io.hexlet.spring_boot.controller;
 
 import io.hexlet.spring_boot.dto.UserCreateDTO;
 import io.hexlet.spring_boot.dto.UserDTO;
+import io.hexlet.spring_boot.dto.UserPatchDTO;
 import io.hexlet.spring_boot.dto.UserUpdateDTO;
 import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.mapper.UserMapper;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -87,5 +89,18 @@ public class UserController {
         }
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserDTO> patch(@PathVariable Long id, @RequestBody UserPatchDTO dto) {
+        var user =
+                userRepository
+                        .findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        userMapper.updateEntityFromDTO(dto, user);
+
+        userRepository.save(user);
+        return ResponseEntity.ok(userMapper.toDTO(user));
     }
 }

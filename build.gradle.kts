@@ -44,6 +44,9 @@ dependencies {
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 	testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
+	//jackson-databind-nullable
+	implementation("org.openapitools:jackson-databind-nullable:0.2.11")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	// Дает MockMvc и аннотацию @AutoConfigureMockMvc
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
