@@ -1,5 +1,6 @@
 package io.hexlet.spring_boot.mapper;
 
+import io.hexlet.spring_boot.dto.PostCreateDTO;
 import io.hexlet.spring_boot.dto.PostDTO;
 import io.hexlet.spring_boot.model.Post;
 import org.springframework.stereotype.Component;
@@ -16,5 +17,12 @@ public class PostMapper {
         postDTO.setCreatedAt(post.getCreatedAt());
         postDTO.setUpdatedAt(post.getUpdatedAt());
         return postDTO;
+    }
+
+    public Post toEntity(PostCreateDTO dto) {
+        Post post = new Post();
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+        return post;
     }
 }

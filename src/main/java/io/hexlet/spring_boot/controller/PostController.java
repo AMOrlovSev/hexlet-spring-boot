@@ -1,5 +1,6 @@
 package io.hexlet.spring_boot.controller;
 
+import io.hexlet.spring_boot.dto.PostCreateDTO;
 import io.hexlet.spring_boot.dto.PostDTO;
 import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.mapper.PostMapper;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api")
@@ -42,12 +44,11 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<PostDTO> create(@Valid @RequestBody Post data) {
-        Post post = new Post();
-
-        post.setTitle(data.getTitle());
-        post.setContent(data.getContent());
-        post.setPublished(data.isPublished());
+    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO data) {
+        Post post = postMapper.toEntity(data);
+        post.setPublished(true);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
 
         Post saved = postRepository.save(post);
 
