@@ -7,7 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,9 +35,17 @@ public class User {
     private Long id;
 
     @NotBlank
+    @Email
     private String email;
+
+    @NotBlank
+    @Size(min = 2, max = 50)
     private String firstName;
+
+    @NotBlank
+    @Size(min = 2, max = 50)
     private String lastName;
+
     private LocalDate birthday;
 
     @CreatedDate
