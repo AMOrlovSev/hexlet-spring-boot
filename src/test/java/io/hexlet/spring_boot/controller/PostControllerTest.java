@@ -1,5 +1,7 @@
 package io.hexlet.spring_boot.controller;
 
+import io.hexlet.spring_boot.dto.PostCreateDTO;
+import io.hexlet.spring_boot.dto.PostUpdateDTO;
 import io.hexlet.spring_boot.model.Post;
 import io.hexlet.spring_boot.repository.PostRepository;
 import net.datafaker.Faker;
@@ -70,10 +72,9 @@ class PostControllerTest {
 
     @Test
     void create_returns201_andBody_andLocationHeader() throws Exception {
-        Post data = Instancio.of(Post.class)
-                .ignore(field(Post::getId))
-                .set(field(Post::getTitle), "New Post Title")
-                .create();
+        PostCreateDTO data = new PostCreateDTO();
+        data.setTitle("New Post Title");
+        data.setContent("New post content");
 
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,8 +83,7 @@ class PostControllerTest {
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.title").value("New Post Title"))
-                .andExpect(jsonPath("$.content").value(data.getContent()))
-                .andExpect(jsonPath("$.published").value(data.isPublished()));
+                .andExpect(jsonPath("$.content").value("New post content"));
     }
 
     @Test
@@ -134,9 +134,9 @@ class PostControllerTest {
     @Test
     void update_missingPost_returns404() throws Exception {
         long missingId = existingPost.getId() + 1_000_000L;
-        Post data = Instancio.of(Post.class)
-                .ignore(field(Post::getId))
-                .create();
+        PostUpdateDTO data = new PostUpdateDTO();
+        data.setTitle("Updated title");
+        data.setContent("Updated content");
 
         mockMvc.perform(put("/api/posts/{id}", missingId)
                         .contentType(MediaType.APPLICATION_JSON)

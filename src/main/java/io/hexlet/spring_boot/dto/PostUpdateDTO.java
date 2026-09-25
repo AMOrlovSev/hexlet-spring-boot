@@ -5,9 +5,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
-public class PostCreateDTO {
+@Setter
+public class PostUpdateDTO {
     @NotBlank
     @Size(min = 3, max = 200)
     private String title;

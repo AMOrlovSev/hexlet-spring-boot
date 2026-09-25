@@ -2,6 +2,7 @@ package io.hexlet.spring_boot.controller;
 
 import io.hexlet.spring_boot.dto.PostCreateDTO;
 import io.hexlet.spring_boot.dto.PostDTO;
+import io.hexlet.spring_boot.dto.PostUpdateDTO;
 import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.mapper.PostMapper;
 import io.hexlet.spring_boot.model.Post;
@@ -46,9 +47,6 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO data) {
         Post post = postMapper.toEntity(data);
-        post.setPublished(true);
-        post.setCreatedAt(LocalDateTime.now());
-        post.setUpdatedAt(LocalDateTime.now());
 
         Post saved = postRepository.save(post);
 
@@ -63,16 +61,14 @@ public class PostController {
     }
 
     @PutMapping("/posts/{id}")
-    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody Post data) {
+    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
         Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
-        post.setTitle(data.getTitle());
-        post.setContent(data.getContent());
-        post.setPublished(data.isPublished());
+        post = postMapper.toEntity(dto, post);
+        postRepository.save(post);
+        PostDTO postDTO = postMapper.toDTO(post);
 
-        Post updated = postRepository.save(post);
-
-        return ResponseEntity.ok(postMapper.toDTO(updated));
+        return ResponseEntity.ok(postDTO);
     }
 
     @DeleteMapping("/posts/{id}")
