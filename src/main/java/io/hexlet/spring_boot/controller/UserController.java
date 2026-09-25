@@ -1,6 +1,8 @@
 package io.hexlet.spring_boot.controller;
 
+import io.hexlet.spring_boot.dto.UserCreateDTO;
 import io.hexlet.spring_boot.dto.UserDTO;
+import io.hexlet.spring_boot.dto.UserUpdateDTO;
 import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.mapper.UserMapper;
 import io.hexlet.spring_boot.model.User;
@@ -46,19 +48,15 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> create(@Valid @RequestBody User data) {
-        User user = new User();
-        user.setEmail(data.getEmail());
-        user.setFirstName(data.getFirstName());
-        user.setLastName(data.getLastName());
-        user.setBirthday(data.getBirthday());
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserCreateDTO dto) {
+        User user = userMapper.toEntity(dto);
 
-        User saved = userRepository.save(user);
-        UserDTO userDTO = userMapper.toDTO(saved);
+        userRepository.save(user);
+        UserDTO userDTO = userMapper.toDTO(user);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(saved.getId())
+                .buildAndExpand(userDTO.getId())
                 .toUri();
         return ResponseEntity.created(location).body(userDTO);
     }
@@ -71,18 +69,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody User data) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO data) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        user.setEmail(data.getEmail());
-        user.setFirstName(data.getFirstName());
-        user.setLastName(data.getLastName());
-        user.setBirthday(data.getBirthday());
+        userMapper.updateEntityFromDTO(data, user);
 
-        User updated = userRepository.save(user);
+        userRepository.save(user);
 
-        return ResponseEntity.ok(userMapper.toDTO(updated));
+        return ResponseEntity.ok(userMapper.toDTO(user));
     }
 
     @DeleteMapping("/{id}")

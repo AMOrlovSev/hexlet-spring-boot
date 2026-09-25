@@ -64,7 +64,7 @@ public class PostController {
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
         Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
-        post = postMapper.toEntity(dto, post);
+        postMapper.updateEntityFromDTO(dto, post);
         postRepository.save(post);
         PostDTO postDTO = postMapper.toDTO(post);
 

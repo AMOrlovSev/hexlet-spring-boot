@@ -4,6 +4,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 	jacoco
 	id("org.sonarqube") version "7.5.0.8588"
+	kotlin("kapt") version "2.4.10" // для генерации
 }
 
 group = "io.hexlet"
@@ -37,6 +38,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 
 	implementation("net.datafaker:datafaker:2.7.0")
+
+	// MapStruct
+	implementation("org.mapstruct:mapstruct:1.6.3")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+	testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	// Дает MockMvc и аннотацию @AutoConfigureMockMvc
