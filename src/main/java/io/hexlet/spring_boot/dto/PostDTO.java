@@ -12,6 +12,7 @@ public class PostDTO {
     private String title;
     private String content;
     private boolean published;
+    private Long userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

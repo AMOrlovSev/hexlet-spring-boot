@@ -3,7 +3,9 @@ package io.hexlet.spring_boot.controller;
 import io.hexlet.spring_boot.dto.PostCreateDTO;
 import io.hexlet.spring_boot.dto.PostUpdateDTO;
 import io.hexlet.spring_boot.model.Post;
+import io.hexlet.spring_boot.model.User;
 import io.hexlet.spring_boot.repository.PostRepository;
+import io.hexlet.spring_boot.repository.UserRepository;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,19 +41,30 @@ class PostControllerTest {
     private PostRepository postRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private Faker faker;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     private Post existingPost;
+    private User existingUser;
 
     @BeforeEach
     void setUp() {
+        existingUser = new User();
+        existingUser.setEmail(faker.internet().emailAddress());
+        existingUser.setFirstName(faker.name().firstName());
+        existingUser.setLastName(faker.name().lastName());
+        existingUser = userRepository.save(existingUser);
+
         existingPost = new Post();
         existingPost.setTitle(faker.book().title());
-        existingPost.setContent(faker.lorem().paragraph(3));
+        existingPost.setContent(faker.lorem().sentence());
         existingPost.setPublished(true);
+        existingPost.setUser(existingUser);
         existingPost = postRepository.save(existingPost);
     }
 
@@ -88,10 +101,10 @@ class PostControllerTest {
 
     @Test
     void create_withBlankTitle_returns422() throws Exception {
-        Post data = Instancio.of(Post.class)
-                .ignore(field(Post::getId))
-                .set(field(Post::getTitle), "")
-                .create();
+        PostCreateDTO data = new PostCreateDTO();
+        data.setTitle("");
+        data.setContent("Valid content");
+        data.setUserId(existingUser.getId());
 
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -117,10 +130,10 @@ class PostControllerTest {
 
     @Test
     void update_existingPost_returns200_andUpdatedBody() throws Exception {
-        Post data = Instancio.of(Post.class)
-                .ignore(field(Post::getId))
-                .set(field(Post::getTitle), "Updated Title")
-                .create();
+        PostUpdateDTO data = new PostUpdateDTO();
+        data.setTitle("Updated Title");
+        data.setContent("Updated content");
+        data.setUserId(existingUser.getId());
 
         mockMvc.perform(put("/api/posts/{id}", existingPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -137,6 +150,7 @@ class PostControllerTest {
         PostUpdateDTO data = new PostUpdateDTO();
         data.setTitle("Updated title");
         data.setContent("Updated content");
+        data.setUserId(existingUser.getId());
 
         mockMvc.perform(put("/api/posts/{id}", missingId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,10 +160,10 @@ class PostControllerTest {
 
     @Test
     void update_withBlankTitle_returns422() throws Exception {
-        Post data = Instancio.of(Post.class)
-                .ignore(field(Post::getId))
-                .set(field(Post::getTitle), "")
-                .create();
+        PostUpdateDTO data = new PostUpdateDTO();
+        data.setTitle("");
+        data.setContent("Valid content");
+        data.setUserId(existingUser.getId());
 
         mockMvc.perform(put("/api/posts/{id}", existingPost.getId())
                         .contentType(MediaType.APPLICATION_JSON)

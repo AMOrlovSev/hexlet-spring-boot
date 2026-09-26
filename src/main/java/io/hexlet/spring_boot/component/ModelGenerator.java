@@ -30,14 +30,15 @@ public class ModelGenerator {
             user.setLastName(faker.name().lastName());
             user.setEmail(faker.internet().emailAddress());
             user.setBirthday(faker.timeAndDate().birthday());
-            userRepository.save(user);
 
             var post = new Post();
             post.setTitle(faker.book().title());
             post.setContent(faker.lorem().paragraph());
             post.setPublished(faker.bool().bool());
-            //post.setUser(user);
-            postRepository.save(post);
+            post.setUser(user);
+
+            user.addPost(post);
+            userRepository.save(user);
         }
     }
 }

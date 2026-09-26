@@ -10,6 +10,7 @@ import io.hexlet.spring_boot.exception.ResourceNotFoundException;
 import io.hexlet.spring_boot.mapper.PostMapper;
 import io.hexlet.spring_boot.model.Post;
 import io.hexlet.spring_boot.repository.PostRepository;
+import io.hexlet.spring_boot.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,10 +29,12 @@ import java.time.LocalDateTime;
 @RequestMapping("/api")
 public class PostController {
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final PostMapper postMapper;
 
-    public PostController(PostRepository postRepository, PostMapper postMapper) {
+    public PostController(PostRepository postRepository, PostMapper postMapper, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
         this.postMapper = postMapper;
     }
 
@@ -53,10 +56,18 @@ public class PostController {
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO data) {
         Post post = postMapper.toEntity(data);
 
-        Post saved = postRepository.save(post);
+        if (data.getUserId() != null) {
+            var user = userRepository.findById(data.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "User not found"));
+            user.addPost(post);
+        }
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(saved.getId()).toUri();
-        return ResponseEntity.created(location).body(postMapper.toDTO(saved));
+        postRepository.save(post);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(post.getId()).toUri();
+        return ResponseEntity.created(location).body(postMapper.toDTO(post));
     }
 
     @GetMapping("/posts/{id}")
@@ -67,13 +78,20 @@ public class PostController {
 
     @PutMapping("/posts/{id}")
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+
+        if (dto.getUserId() != null) {
+            var user = userRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "User not found"));
+            post.setUser(user);
+        }
 
         postMapper.updateEntityFromDTO(dto, post);
         postRepository.save(post);
-        PostDTO postDTO = postMapper.toDTO(post);
 
-        return ResponseEntity.ok(postDTO);
+        return ResponseEntity.ok(postMapper.toDTO(post));
     }
 
     @DeleteMapping("/posts/{id}")
@@ -91,6 +109,17 @@ public class PostController {
                 postRepository
                         .findById(id)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (dto.getUserId().isPresent()) {
+            Long userId = dto.getUserId().get();
+            if (userId == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId cannot be null");
+            }
+            var user = userRepository
+                    .findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            post.setUser(user);
+        }
 
         postMapper.updateEntityFromDTO(dto, post);
 

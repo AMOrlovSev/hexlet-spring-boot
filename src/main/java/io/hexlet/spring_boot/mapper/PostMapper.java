@@ -6,6 +6,7 @@ import io.hexlet.spring_boot.dto.PostPatchDTO;
 import io.hexlet.spring_boot.dto.PostUpdateDTO;
 import io.hexlet.spring_boot.model.Post;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -18,11 +19,15 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class PostMapper {
 
+    @Mapping(source = "user.id", target = "userId")
     public abstract PostDTO toDTO(Post post);
 
+    @Mapping(target = "user", ignore = true)
     public abstract Post toEntity(PostCreateDTO dto);
 
+    @Mapping(target = "user", ignore = true)
     public abstract void updateEntityFromDTO(PostUpdateDTO dto, @MappingTarget Post post);
 
+    @Mapping(target = "user", ignore = true)
     public abstract void updateEntityFromDTO(PostPatchDTO dto, @MappingTarget Post post);
 }
