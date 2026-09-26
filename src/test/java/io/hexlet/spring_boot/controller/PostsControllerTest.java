@@ -62,13 +62,15 @@ class PostsControllerTest {
     // ==================== INDEX ====================
 
     @Test
-    void testIndexReturnsOnlyPublishedPosts() throws Exception {
+    void testIndexReturnsOnlyPublishedPostsWithFilter() throws Exception {
         postRepository.save(newPost("Draft post", "Draft content", false, author, List.of()));
 
-        mockMvc.perform(get("/api/posts"))
+        mockMvc.perform(get("/api/posts").param("published", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].title").value("Hello World"))
+                .andExpect(jsonPath("$.content[0].published").value(true));
     }
 
     @Test
